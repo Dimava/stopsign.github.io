@@ -11,11 +11,13 @@
 
     <title>Idle Loops</title>
     <link rel="stylesheet" href="stylesheet.css">
+    <link rel="stylesheet" href="vue-stylesheet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     
     <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js'></script>
+    <script type='text/javascript' src='./vue.js'></script>
 </head>
 <body id="theBody">
 
@@ -476,6 +478,1329 @@
             <div class="button" onclick="closeTutorial()">OK</div>
         </div>
     </div>
+
+    <div id="app" style="display:block">
+        
+
+
+    <div id="timeInfo" style="width:100%;text-align:center;">
+        <div id="timeBarBG">
+            <div id="timeBar" :style="{width:100*mana/manaMax+'%'}"></div>
+        </div>
+        <div style="float:left;height:30px;margin-left:10px;" class="showthatH">
+            Changelog
+        </div>
+        <div style="float:left;height:30px;margin-left:10px;" class="showthatH">
+            Saving
+        </div>
+        <div style="float:left;height:30px;margin-left:10px;" class="showthatH">
+            FAQ
+        </div>
+        <div style="float:left;height:30px;margin-left:10px;" class="showthatH">
+            Options
+        </div>
+        <div class="showthat">
+            <div class='bold'>Mana</div> <div id="timer"> {{ manaTimer }} </div>
+            <div class="showthis">Your main resource. The higher your mana, the more you can do before reset.</div>
+        </div>
+        <div class="showthat" v-show="visible.gold">
+            <div class='bold'>Gold</div> <div id="gold"> {{ resources.gold }} </div>
+            <div class="showthis">Sell for mana, or use for actions.<br>Resets when the loop restarts.</div>
+        </div>
+        <div class="showthat" v-show="visible.reputation">
+            <div class='bold'>Reputation</div> <div id="reputation"> {{ resources.reputation }} </div>
+            <div class="showthis">The influence you have over the people in town.<br>Resets when the loop restarts.</div>
+        </div>
+        <div class="showthat" v-show="resources.supplies">
+            <div class='bold'>Supplies</div> <div id="supplies"> {{ resources.supplies }} </div>
+            <div class="showthis">Needed to go to the next town.<br>Resets when the loop restarts.</div>
+        </div>
+        <div class="showthat" v-show="resources.herbs">
+            <div class='bold'>Herbs</div> <div id="herbs"> {{ resources.herbs }} </div>
+            <div class="showthis">The beneficial plants you've found.<br>Resets when the loop restarts.</div>
+        </div>
+        <div class="showthat" v-show="resources.hide">
+            <div class='bold'>Hide</div> <div id="hide"> {{ resources.hide }} </div>
+            <div class="showthis">Results of successful hunting.<br>Resets when the loop restarts.</div>
+        </div>
+        <div class="showthat" v-show="resources.potions">
+            <div class='bold'>Potions</div> <div id="potions"> {{ resources.potions }} </div>
+            <div class="showthis">Rare, but not complex. Worth some money.<br>Resets when the loop restarts.</div>
+        </div>
+        <div class="showthat" v-show="resources.glasses">
+            <div class='bold'>Glasses</div>
+            <div class="showthis">Woah, trees have so many leaves on them.<br>Resets when the loop restarts.</div>
+        </div>
+        <br>
+        <div id="pausePlay" onclick="pauseGame()" class="button">Pause</div>
+        <input type="checkbox" id="pauseBeforeRestart" v-model="options.pauseBeforeRestart">
+        <label for="pauseBeforeRestart">Pause before restart</label>
+        <div onclick="restart()" class="button showthat">
+            Restart
+            <div class="showthis" style="color:black;width:230px;">
+                Resets the loop. Not a hard reset.
+            </div>
+        </div>
+        <div class="showthat">
+            <div class="showthat" onmouseover="view.updateStory(storyShowing)" style="height:30px;">
+                <div class="large bold">Story</div><div id="newStory" style="color:red;display:none;">(!)</div>
+                <div class="showthis" style="width:400px;">
+                    <div style="margin-left:175px;" class="actionIcon fa fa-arrow-left" id="storyLeft" onclick="view.updateStory(storyShowing-1)"></div>
+                    <div style="" id="storyPage" class="bold"></div>
+                    <div style="" class="actionIcon fa fa-arrow-right" id="storyRight" onclick="view.updateStory(storyShowing+1)"></div>
+                    <div id="story0">
+                        You're a simple courier, on a long trip to deliver a high priority package. Just as you entered town, you tripped - breaking your glasses - and the package burst open, spilling a strange liquid on you. Immediately, your meager amount of mana started draining rapidly. Right as your mana became empty, you found yourself back in the moment the liquid was absorbed into your skin, with your tiny reserves filled... yet draining just as before. This happened again and again, the world resetting with you, until you decided you had to figure out a way to prolong how long these 'loops' were. Mana crystals are often stored in pottery around town, perhaps you'll start there ...
+                    </div>
+                    <div id="story1" style="display:none">
+                        You reach the end of the dungeon, where a softly glowing orb floats on a pedastal. You've found the dungeon core - for the first level of the dungeon, at least. As you grasp it, the essence dives into you, infusing your very being with the power it holds. It is a small amount of power, but this is a small dungeon. You'll be back to take this power again, knowing with the foreign knowledge implanted that it will stay with you no matter when you are.
+                    </div>
+                    <div id="story2" style="display:none">
+                        You reach the end of the dungeon again, but for the first time the core isn't glowing. It's always been thought that dungeon cores build based on the mana spent around them, but you're beginning to think the essence of it's previous incarnations drains it somehow. It doesn't always happen, but you'll need to put more mana into the world to take the core's benefits out of it. You shrug, accepting yet another oddity of the loops.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="statsColumn" style="width:410px;vertical-align:top;">
+        <div id="statsWindow" style="width:90%;margin-left:12px;text-align:center;position:relative;">
+            <div class="showthat">
+                <div class="large bold">Stats</div>
+                <div class="showthis" style="width:550px;">
+                    Each stat level reduces the relevant part of an action's mana cost by 1%.<br>
+                    Talent gets 1% of all level progress, and keeps through loops.<br>
+                    Each talent level increases Bonus XP of its skill by 1%.<br>
+                    XP gain towards an stat per action is (actual mana / original mana) * (talent %) per tick.<br>
+                    Bonus XP is a combination of talent and soulstone bonuses.<br><br>
+                    e.g. Meet People costs 800 mana and has a breakdown of <div class="bold">Int</div> 10% <div class="bold">Cha</div> 80% <div class="bold">Soul</div> 10%.<br>
+                    This effectively means 80 of the mana is controlled by <div class="bold">Int</div>, another 80 by <div class="bold">Soul</div>, and the remaining 640 by <div class="bold">Cha</div>.<br>
+                    If your <div class="bold">Cha</div> is level 20 when the action is started, it'd be 640 / 1.2 = 533.333<br>
+                    Adding back the 160 from <div class="bold">Soul</div> and <div class="bold">Int</div>, the total mana the action takes (rounded up) is now 694, so ~15% less mana.<br>
+                    The action would give (800/694)*(1+talent/100) level exp per mana for the 694 mana.
+                </div>
+            </div><br>
+            <div class="showthat">
+                <canvas id="statChartCtx" width="350" height="350"></canvas>
+                <div class="showthis" style="margin-top:20px;width:375px">
+                    Click the legend to show/hide each.<br>
+                    Upon freshly starting, Levels and Talent won't change much.<br>
+                    Hover Stats for more info.
+                </div>
+            </div>
+            <div id="statContainer" style="width:100%;position:absolute;top:0;left:0;"></div><br>
+            <div id="skillList" v-show="skills.Combat.exp+skills.Combat.level+skills.Magic.exp+skills.Magic.level">
+                <div class="showthat">
+                    <div class="large bold">Skills</div>
+                    <div class="showthis">
+                        Skills last through resets.<br>
+                    </div>
+                </div><br>
+                <div class="skillContainer showthat" v-for="(skill, name) in skills" v-show="skill.exp + skill.level">
+                    <div class="statLabel medium bold"> {{ desc.skillName[name] }} </div>
+                    <div class="statNum medium"><div id="skillCombatLevel"> {{ skill.level }} </div></div>
+                    <div style="margin-top:18px;"></div>
+                    <div class="thinProgressBarUpper"><div class="statBar skillExpBar townExpBar" :style="{width:100*skill.exp/skill.expToLevel+'%'}"></div></div>
+                    <div class="showthis">
+                        {{ desc.skill[name] }} <br>
+                        <div class="medium bold">Level</div> {{ skill.exp }}/{{ skill.expToLevel }} <div class="statTooltipPerc">({{ intToString(100*skill.exp/skill.expToLevel, 2) }}%)</div><br>
+                        <div v-if="desc.skillEffect[name]" style="white-space:pre"> {{ desc.skillEffect[name] }} </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="actionsColumn" style="width:350px;vertical-align:top;">
+
+<!--  -->
+    
+                <div id="expandableList">
+                    <div style="width:35%;height:100%;background-color:#c2e6cc;text-align:center;vertical-align:top;position:relative;">
+                        <div id="curActionsList" style="margin-top:10px;text-align:left;max-height:370px;overflow:auto;width:100%;">
+                            <div class="curActionContainer small" v-for="(action, index) in actions.current" @mouseover="mouseoverAction(index, true)" @mouseleave="mouseoverAction(index, false)">
+                                <div :class="{curActionBar:true, actionLoopsFailed:action.loopsFailed, actionCurrentPos:actions.currentPos == index, actionFinished: action.loopsLeft === 0}" id="actionBar" :style="{width:!action.loopsLeft||action.loopsFailed?'':(100*action.ticks/action.adjustedTicks)+'%'}"></div>
+                                <div class="actionSelectedIndicator" id="actionSelected" :style="{opacity: 1 ? 1 : 0}"></div>
+                                <img :src="'img/' + camelize(action.name) + '.svg'" class="smallIcon">
+                                x <div id="actionLoopsLeft" style="margin-left:3px">{{ action.loops }}</div>
+                                (<div id="actionLoops">{{ action.loopsLeft }}</div>)
+                            </div>
+                        </div>
+                        <div class="showthat" style="position:absolute;bottom:0;left:0;width:100%;">
+                            <div class="bold">Mana Used</div>
+                            <div id="totalTicks">{{actions.completedTicks}}</div>
+                            <div class="showthis">
+                                Shows stat gain affecting speed.<br>
+                                Updates every completed action.<br>Accurate at end of run.
+                        
+                            </div>
+                        </div>
+                    </div>
+                    <div style="width:65%;height:100%;background-color:#cdded2;text-align:center;vertical-align:top;position:relative;">
+                        <div id="nextActionsList" style="margin-top: 10px; width: 100%; text-align: left; max-height: 357px; overflow: auto; display: inline-block;">
+                            <div id="nextActionContainer0" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(0)" ondragenter="dragOverDecorate(0)" ondragleave="dragExitUndecorate(0)" draggable="true" data-index="0">
+                                <img src="img/smashPots.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">3</div>
+                                <div style="float:right">
+                                    <i id="capButton0" onclick="capAmount(0, 0)" class="actionIcon fa fa-circle-thin"></i>
+                                    <i id="plusButton0" onclick="addLoop(0)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton0" onclick="removeLoop(0)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton0" onclick="split(0)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton0" onclick="moveUp(0)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton0" onclick="moveDown(0)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton0" onclick="removeAction(0)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer1" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(1)" ondragenter="dragOverDecorate(1)" ondragleave="dragExitUndecorate(1)" draggable="true" data-index="1">
+                                <img src="img/trainSpeed.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">1</div>
+                                <div style="float:right">
+                                    <i id="plusButton1" onclick="addLoop(1)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton1" onclick="removeLoop(1)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton1" onclick="split(1)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton1" onclick="moveUp(1)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton1" onclick="moveDown(1)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton1" onclick="removeAction(1)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer2" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(2)" ondragenter="dragOverDecorate(2)" ondragleave="dragExitUndecorate(2)" draggable="true" data-index="2">
+                                <img src="img/smashPots.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">3</div>
+                                <div style="float:right">
+                                    <i id="capButton2" onclick="capAmount(2, 0)" class="actionIcon fa fa-circle-thin"></i>
+                                    <i id="plusButton2" onclick="addLoop(2)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton2" onclick="removeLoop(2)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton2" onclick="split(2)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton2" onclick="moveUp(2)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton2" onclick="moveDown(2)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton2" onclick="removeAction(2)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer3" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(3)" ondragenter="dragOverDecorate(3)" ondragleave="dragExitUndecorate(3)" draggable="true" data-index="3">
+                                <img src="img/trainSpeed.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">1</div>
+                                <div style="float:right">
+                                    <i id="plusButton3" onclick="addLoop(3)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton3" onclick="removeLoop(3)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton3" onclick="split(3)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton3" onclick="moveUp(3)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton3" onclick="moveDown(3)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton3" onclick="removeAction(3)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer4" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(4)" ondragenter="dragOverDecorate(4)" ondragleave="dragExitUndecorate(4)" draggable="true" data-index="4">
+                                <img src="img/smashPots.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">3</div>
+                                <div style="float:right">
+                                    <i id="capButton4" onclick="capAmount(4, 0)" class="actionIcon fa fa-circle-thin"></i>
+                                    <i id="plusButton4" onclick="addLoop(4)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton4" onclick="removeLoop(4)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton4" onclick="split(4)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton4" onclick="moveUp(4)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton4" onclick="moveDown(4)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton4" onclick="removeAction(4)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer5" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(5)" ondragenter="dragOverDecorate(5)" ondragleave="dragExitUndecorate(5)" draggable="true" data-index="5">
+                                <img src="img/trainSpeed.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">1</div>
+                                <div style="float:right">
+                                    <i id="plusButton5" onclick="addLoop(5)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton5" onclick="removeLoop(5)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton5" onclick="split(5)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton5" onclick="moveUp(5)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton5" onclick="moveDown(5)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton5" onclick="removeAction(5)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer6" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(6)" ondragenter="dragOverDecorate(6)" ondragleave="dragExitUndecorate(6)" draggable="true" data-index="6">
+                                <img src="img/smashPots.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">2</div>
+                                <div style="float:right">
+                                    <i id="capButton6" onclick="capAmount(6, 0)" class="actionIcon fa fa-circle-thin"></i>
+                                    <i id="plusButton6" onclick="addLoop(6)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton6" onclick="removeLoop(6)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton6" onclick="split(6)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton6" onclick="moveUp(6)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton6" onclick="moveDown(6)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton6" onclick="removeAction(6)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer7" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(7)" ondragenter="dragOverDecorate(7)" ondragleave="dragExitUndecorate(7)" draggable="true" data-index="7">
+                                <img src="img/trainSpeed.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">1</div>
+                                <div style="float:right">
+                                    <i id="plusButton7" onclick="addLoop(7)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton7" onclick="removeLoop(7)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton7" onclick="split(7)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton7" onclick="moveUp(7)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton7" onclick="moveDown(7)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton7" onclick="removeAction(7)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer8" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(8)" ondragenter="dragOverDecorate(8)" ondragleave="dragExitUndecorate(8)" draggable="true" data-index="8">
+                                <img src="img/smashPots.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">2</div>
+                                <div style="float:right">
+                                    <i id="capButton8" onclick="capAmount(8, 0)" class="actionIcon fa fa-circle-thin"></i>
+                                    <i id="plusButton8" onclick="addLoop(8)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton8" onclick="removeLoop(8)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton8" onclick="split(8)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton8" onclick="moveUp(8)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton8" onclick="moveDown(8)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton8" onclick="removeAction(8)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer9" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(9)" ondragenter="dragOverDecorate(9)" ondragleave="dragExitUndecorate(9)" draggable="true" data-index="9">
+                                <img src="img/trainSpeed.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">1</div>
+                                <div style="float:right">
+                                    <i id="plusButton9" onclick="addLoop(9)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton9" onclick="removeLoop(9)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton9" onclick="split(9)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton9" onclick="moveUp(9)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton9" onclick="moveDown(9)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton9" onclick="removeAction(9)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer10" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(10)" ondragenter="dragOverDecorate(10)" ondragleave="dragExitUndecorate(10)" draggable="true" data-index="10">
+                                <img src="img/smashPots.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">8</div>
+                                <div style="float:right">
+                                    <i id="capButton10" onclick="capAmount(10, 0)" class="actionIcon fa fa-circle-thin"></i>
+                                    <i id="plusButton10" onclick="addLoop(10)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton10" onclick="removeLoop(10)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton10" onclick="split(10)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton10" onclick="moveUp(10)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton10" onclick="moveDown(10)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton10" onclick="removeAction(10)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer11" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(11)" ondragenter="dragOverDecorate(11)" ondragleave="dragExitUndecorate(11)" draggable="true" data-index="11">
+                                <img src="img/trainSpeed.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">5</div>
+                                <div style="float:right">
+                                    <i id="plusButton11" onclick="addLoop(11)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton11" onclick="removeLoop(11)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton11" onclick="split(11)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton11" onclick="moveUp(11)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton11" onclick="moveDown(11)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton11" onclick="removeAction(11)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer12" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(12)" ondragenter="dragOverDecorate(12)" ondragleave="dragExitUndecorate(12)" draggable="true" data-index="12">
+                                <img src="img/smashPots.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">26</div>
+                                <div style="float:right">
+                                    <i id="capButton12" onclick="capAmount(12, 0)" class="actionIcon fa fa-circle-thin"></i>
+                                    <i id="plusButton12" onclick="addLoop(12)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton12" onclick="removeLoop(12)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton12" onclick="split(12)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton12" onclick="moveUp(12)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton12" onclick="moveDown(12)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton12" onclick="removeAction(12)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer13" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(13)" ondragenter="dragOverDecorate(13)" ondragleave="dragExitUndecorate(13)" draggable="true" data-index="13">
+                                <img src="img/trainDex.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">3</div>
+                                <div style="float:right">
+                                    <i id="plusButton13" onclick="addLoop(13)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton13" onclick="removeLoop(13)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton13" onclick="split(13)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton13" onclick="moveUp(13)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton13" onclick="moveDown(13)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton13" onclick="removeAction(13)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer14" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(14)" ondragenter="dragOverDecorate(14)" ondragleave="dragExitUndecorate(14)" draggable="true" data-index="14">
+                                <img src="img/pickLocks.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">6</div>
+                                <div style="float:right">
+                                    <i id="capButton14" onclick="capAmount(14, 0)" class="actionIcon fa fa-circle-thin"></i>
+                                    <i id="plusButton14" onclick="addLoop(14)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton14" onclick="removeLoop(14)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton14" onclick="split(14)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton14" onclick="moveUp(14)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton14" onclick="moveDown(14)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton14" onclick="removeAction(14)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer15" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(15)" ondragenter="dragOverDecorate(15)" ondragleave="dragExitUndecorate(15)" draggable="true" data-index="15">
+                                <img src="img/buyMana.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">1</div>
+                                <div style="float:right">
+                                    <i id="plusButton15" onclick="addLoop(15)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton15" onclick="removeLoop(15)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton15" onclick="split(15)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton15" onclick="moveUp(15)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton15" onclick="moveDown(15)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton15" onclick="removeAction(15)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer16" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(16)" ondragenter="dragOverDecorate(16)" ondragleave="dragExitUndecorate(16)" draggable="true" data-index="16">
+                                <img src="img/trainDex.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">7</div>
+                                <div style="float:right">
+                                    <i id="plusButton16" onclick="addLoop(16)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton16" onclick="removeLoop(16)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton16" onclick="split(16)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton16" onclick="moveUp(16)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton16" onclick="moveDown(16)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton16" onclick="removeAction(16)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer17" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(17)" ondragenter="dragOverDecorate(17)" ondragleave="dragExitUndecorate(17)" draggable="true" data-index="17">
+                                <img src="img/pickLocks.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">4</div>
+                                <div style="float:right">
+                                    <i id="capButton17" onclick="capAmount(17, 0)" class="actionIcon fa fa-circle-thin"></i>
+                                    <i id="plusButton17" onclick="addLoop(17)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton17" onclick="removeLoop(17)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton17" onclick="split(17)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton17" onclick="moveUp(17)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton17" onclick="moveDown(17)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton17" onclick="removeAction(17)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer18" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(18)" ondragenter="dragOverDecorate(18)" ondragleave="dragExitUndecorate(18)" draggable="true" data-index="18">
+                                <img src="img/trainStrength.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">10</div>
+                                <div style="float:right">
+                                    <i id="plusButton18" onclick="addLoop(18)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton18" onclick="removeLoop(18)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton18" onclick="split(18)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton18" onclick="moveUp(18)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton18" onclick="moveDown(18)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton18" onclick="removeAction(18)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer19" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(19)" ondragenter="dragOverDecorate(19)" ondragleave="dragExitUndecorate(19)" draggable="true" data-index="19">
+                                <img src="img/longQuest.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">10</div>
+                                <div style="float:right">
+                                    <i id="capButton19" onclick="capAmount(19, 0)" class="actionIcon fa fa-circle-thin"></i>
+                                    <i id="plusButton19" onclick="addLoop(19)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton19" onclick="removeLoop(19)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton19" onclick="split(19)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton19" onclick="moveUp(19)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton19" onclick="moveDown(19)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton19" onclick="removeAction(19)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer20" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(20)" ondragenter="dragOverDecorate(20)" ondragleave="dragExitUndecorate(20)" draggable="true" data-index="20">
+                                <img src="img/fightMonsters.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">1</div>
+                                <div style="float:right">
+                                    <i id="plusButton20" onclick="addLoop(20)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton20" onclick="removeLoop(20)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton20" onclick="split(20)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton20" onclick="moveUp(20)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton20" onclick="moveDown(20)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton20" onclick="removeAction(20)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer21" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(21)" ondragenter="dragOverDecorate(21)" ondragleave="dragExitUndecorate(21)" draggable="true" data-index="21">
+                                <img src="img/buyMana.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">1</div>
+                                <div style="float:right">
+                                    <i id="plusButton21" onclick="addLoop(21)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton21" onclick="removeLoop(21)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton21" onclick="split(21)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton21" onclick="moveUp(21)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton21" onclick="moveDown(21)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton21" onclick="removeAction(21)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer22" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(22)" ondragenter="dragOverDecorate(22)" ondragleave="dragExitUndecorate(22)" draggable="true" data-index="22">
+                                <img src="img/trainSpeed.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">0</div>
+                                <div style="float:right">
+                                    <i id="plusButton22" onclick="addLoop(22)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton22" onclick="removeLoop(22)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton22" onclick="split(22)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton22" onclick="moveUp(22)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton22" onclick="moveDown(22)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton22" onclick="removeAction(22)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer23" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(23)" ondragenter="dragOverDecorate(23)" ondragleave="dragExitUndecorate(23)" draggable="true" data-index="23">
+                                <img src="img/trainDex.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">0</div>
+                                <div style="float:right">
+                                    <i id="plusButton23" onclick="addLoop(23)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton23" onclick="removeLoop(23)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton23" onclick="split(23)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton23" onclick="moveUp(23)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton23" onclick="moveDown(23)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton23" onclick="removeAction(23)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer24" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(24)" ondragenter="dragOverDecorate(24)" ondragleave="dragExitUndecorate(24)" draggable="true" data-index="24">
+                                <img src="img/trainStrength.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">0</div>
+                                <div style="float:right">
+                                    <i id="plusButton24" onclick="addLoop(24)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton24" onclick="removeLoop(24)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton24" onclick="split(24)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton24" onclick="moveUp(24)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton24" onclick="moveDown(24)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton24" onclick="removeAction(24)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer25" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(25)" ondragenter="dragOverDecorate(25)" ondragleave="dragExitUndecorate(25)" draggable="true" data-index="25">
+                                <img src="img/smallDungeon.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">1</div>
+                                <div style="float:right">
+                                    <i id="plusButton25" onclick="addLoop(25)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton25" onclick="removeLoop(25)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton25" onclick="split(25)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton25" onclick="moveUp(25)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton25" onclick="moveDown(25)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton25" onclick="removeAction(25)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer26" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(26)" ondragenter="dragOverDecorate(26)" ondragleave="dragExitUndecorate(26)" draggable="true" data-index="26">
+                                <img src="img/shortQuest.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">20</div>
+                                <div style="float:right">
+                                    <i id="capButton26" onclick="capAmount(26, 0)" class="actionIcon fa fa-circle-thin"></i>
+                                    <i id="plusButton26" onclick="addLoop(26)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton26" onclick="removeLoop(26)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton26" onclick="split(26)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton26" onclick="moveUp(26)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton26" onclick="moveDown(26)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton26" onclick="removeAction(26)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer27" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(27)" ondragenter="dragOverDecorate(27)" ondragleave="dragExitUndecorate(27)" draggable="true" data-index="27">
+                                <img src="img/buyMana.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">1</div>
+                                <div style="float:right">
+                                    <i id="plusButton27" onclick="addLoop(27)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton27" onclick="removeLoop(27)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton27" onclick="split(27)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton27" onclick="moveUp(27)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton27" onclick="moveDown(27)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton27" onclick="removeAction(27)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer28" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(28)" ondragenter="dragOverDecorate(28)" ondragleave="dragExitUndecorate(28)" draggable="true" data-index="28">
+                                <img src="img/trainStrength.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">40</div>
+                                <div style="float:right">
+                                    <i id="plusButton28" onclick="addLoop(28)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton28" onclick="removeLoop(28)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton28" onclick="split(28)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton28" onclick="moveUp(28)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton28" onclick="moveDown(28)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton28" onclick="removeAction(28)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer29" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(29)" ondragenter="dragOverDecorate(29)" ondragleave="dragExitUndecorate(29)" draggable="true" data-index="29">
+                                <img src="img/trainDex.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">40</div>
+                                <div style="float:right">
+                                    <i id="plusButton29" onclick="addLoop(29)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton29" onclick="removeLoop(29)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton29" onclick="split(29)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton29" onclick="moveUp(29)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton29" onclick="moveDown(29)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton29" onclick="removeAction(29)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                            <div id="nextActionContainer30" class="nextActionContainer small" ondragover="handleDragOver(event)" ondrop="handleDragDrop(event)" ondragstart="handleDragStart(event)" ondragend="draggedUndecorate(30)" ondragenter="dragOverDecorate(30)" ondragleave="dragExitUndecorate(30)" draggable="true" data-index="30">
+                                <img src="img/warriorLessons.svg" class="smallIcon imageDragFix">
+                                x <div class="bold">1</div>
+                                <div style="float:right">
+                                    <i id="plusButton30" onclick="addLoop(30)" class="actionIcon fa fa-plus"></i>
+                                    <i id="minusButton30" onclick="removeLoop(30)" class="actionIcon fa fa-minus"></i>
+                                    <i id="splitButton30" onclick="split(30)" class="actionIcon fa fa-arrows-h"></i>
+                                    <i id="upButton30" onclick="moveUp(30)" class="actionIcon fa fa-sort-up"></i>
+                                    <i id="downButton30" onclick="moveDown(30)" class="actionIcon fa fa-sort-down"></i>
+                                    <i id="removeButton30" onclick="removeAction(30)" class="actionIcon fa fa-times"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="actionTooltipContainer" style="margin-top: 10px; width: 100%; text-align: left; max-height: 357px; overflow: auto; display: none;">
+                            <div id="actionTooltip0" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Smash Pots</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action0ManaOrig">27</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action0ManaUsed">27</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action0Remaining">523</div>
+                                <br>
+                                <br>
+                                <div id="action0ExpGain">
+                                    <div class="bold">Str</div>
+                                    10.1K<br>
+                                    <div class="bold">Spd</div>
+                                    7452.9<br>
+                                    <div class="bold">Per</div>
+                                    2470.0<br>
+                                </div>
+                                <div id="action0HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action0Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action0Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip1" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Train Speed</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action1ManaOrig">500</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action1ManaUsed">10</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action1Remaining">513</div>
+                                <br>
+                                <br>
+                                <div id="action1ExpGain">
+                                    <div class="bold">Con</div>
+                                    12.2K<br>
+                                    <div class="bold">Spd</div>
+                                    16K<br>
+                                </div>
+                                <div id="action1HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action1Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action1Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip2" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Smash Pots</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action2ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action2ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action2Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action2ExpGain"></div>
+                                <div id="action2HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action2Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action2Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip3" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Train Speed</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action3ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action3ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action3Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action3ExpGain"></div>
+                                <div id="action3HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action3Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action3Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip4" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Smash Pots</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action4ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action4ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action4Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action4ExpGain"></div>
+                                <div id="action4HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action4Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action4Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip5" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Train Speed</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action5ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action5ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action5Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action5ExpGain"></div>
+                                <div id="action5HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action5Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action5Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip6" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Smash Pots</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action6ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action6ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action6Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action6ExpGain"></div>
+                                <div id="action6HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action6Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action6Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip7" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Train Speed</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action7ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action7ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action7Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action7ExpGain"></div>
+                                <div id="action7HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action7Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action7Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip8" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Smash Pots</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action8ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action8ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action8Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action8ExpGain"></div>
+                                <div id="action8HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action8Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action8Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip9" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Train Speed</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action9ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action9ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action9Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action9ExpGain"></div>
+                                <div id="action9HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action9Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action9Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip10" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Smash Pots</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action10ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action10ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action10Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action10ExpGain"></div>
+                                <div id="action10HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action10Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action10Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip11" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Train Speed</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action11ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action11ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action11Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action11ExpGain"></div>
+                                <div id="action11HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action11Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action11Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip12" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Smash Pots</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action12ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action12ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action12Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action12ExpGain"></div>
+                                <div id="action12HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action12Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action12Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip13" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Train Dex</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action13ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action13ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action13Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action13ExpGain"></div>
+                                <div id="action13HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action13Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action13Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip14" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Pick Locks</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action14ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action14ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action14Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action14ExpGain"></div>
+                                <div id="action14HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action14Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action14Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip15" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Buy Mana</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action15ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action15ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action15Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action15ExpGain"></div>
+                                <div id="action15HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action15Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action15Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip16" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Train Dex</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action16ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action16ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action16Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action16ExpGain"></div>
+                                <div id="action16HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action16Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action16Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip17" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Pick Locks</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action17ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action17ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action17Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action17ExpGain"></div>
+                                <div id="action17HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action17Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action17Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip18" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Train Strength</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action18ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action18ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action18Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action18ExpGain"></div>
+                                <div id="action18HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action18Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action18Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip19" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Long Quest</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action19ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action19ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action19Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action19ExpGain"></div>
+                                <div id="action19HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action19Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action19Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip20" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Fight Monsters</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action20ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action20ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action20Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action20ExpGain"></div>
+                                <div id="action20HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action20Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action20Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip21" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Buy Mana</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action21ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action21ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action21Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action21ExpGain"></div>
+                                <div id="action21HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action21Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action21Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip22" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Small Dungeon</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action22ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action22ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action22Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action22ExpGain"></div>
+                                <div id="action22HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action22Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action22Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip23" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Short Quest</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action23ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action23ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action23Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action23ExpGain"></div>
+                                <div id="action23HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action23Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action23Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip24" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Buy Mana</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action24ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action24ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action24Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action24ExpGain"></div>
+                                <div id="action24HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action24Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action24Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip25" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Train Strength</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action25ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action25ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action25Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action25ExpGain"></div>
+                                <div id="action25HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action25Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action25Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip26" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Train Dex</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action26ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action26ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action26Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action26ExpGain"></div>
+                                <div id="action26HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action26Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action26Error"></div>
+                                </div>
+                            </div>
+                            <div id="actionTooltip27" style="display:none;padding-left:10px;width:90%">
+                                <div style="text-align:center;width:100%">Warrior Lessons</div>
+                                <br>
+                                <br>
+                                <div class="bold">Mana Original</div>
+                                <div id="action27ManaOrig">0</div>
+                                <br>
+                                <div class="bold">Mana Used</div>
+                                <div id="action27ManaUsed">0</div>
+                                <br>
+                                <div class="bold">Remaining</div>
+                                <div id="action27Remaining"></div>
+                                <br>
+                                <br>
+                                <div id="action27ExpGain"></div>
+                                <div id="action27HasFailed" style="display:none">
+                                    <div class="bold">Failed Attempts</div>
+                                    <div id="action27Failed">0</div>
+                                    <br>
+                                    <div class="bold">Error</div>
+                                    <div id="action27Error"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="position:absolute;bottom:0;left:0;width:100%;">
+                            <div class="bold">Amount</div>
+                            <div class="button" id="amount1" onclick="changeActionAmount(1, 1)">1</div>
+                            <div class="button unused" id="amount2" onclick="changeActionAmount(5, 2)">5</div>
+                            <div class="button unused" id="amount3" onclick="changeActionAmount(10, 3)">10</div>
+                        </div>
+                    </div>
+                </div>
+<!--  -->
+
+    
+        <div id="actionList" style="width:100%;text-align:center;">
+            <div class="showthat">
+                <div class="large bold">Action List</div>
+                <div class="showthis">
+                    <i class='actionIcon fa fa-circle-thin'></i> Cap to current max<br>
+                    <i class='actionIcon fa fa-plus'></i> Add one loop<br>
+                    <i class='actionIcon fa fa-minus'></i> Subtract one loop<br>
+                    <i class='actionIcon fa fa-arrows-h'></i> Split action<br>
+                    <i class='actionIcon fa fa-sort-up'></i> Move action up<br>
+                    <i class='actionIcon fa fa-sort-down'></i> Move action down<br>
+                    <i class='actionIcon fa fa-times'></i> Remove action<br>
+                    Drag and drop the actions to re-arrange them.<br>
+                    The next list becomes the current list every restart.<br>
+                    One second = 50 mana.<br>
+                    Minimum 1 tick per action.<br>
+                    Restarts automatically upon no actions left.<br>
+                </div>
+            </div><br>
+            <div id="expandableList">
+                <div style="width:35%;height:100%;background-color:#c2e6cc;text-align:center;vertical-align:top;position:relative;">
+                    <div id="curActionsList" style="margin-top:10px;text-align:left;max-height:370px;overflow:auto;width:100%;"></div>
+                    <div class="showthat" style="position:absolute;bottom:0;left:0;width:100%;">
+                        <div class="bold">Mana Used</div> <div id="totalTicks"></div>
+                        <div class="showthis">
+                            Shows stat gain affecting speed.<br>
+                            Updates every completed action.<br>
+                            Accurate at end of run.
+                        </div>
+                    </div>
+                </div><div style="width:65%;height:100%;background-color:#cdded2;text-align:center;vertical-align:top;position:relative;">
+                    <div id="nextActionsList" style="margin-top:10px;width:100%;text-align:left;max-height:357px;overflow:auto;"></div>
+                    <div id="actionTooltipContainer" style="margin-top:10px;width:100%;text-align:left;max-height:357px;overflow:auto;"></div>
+                    <div style="position:absolute;bottom:0;left:0;width:100%;">
+                        <div class="bold">Amount</div>
+                        <div class="button" id="amount1" onclick="changeActionAmount(1, 1)">1</div>
+                        <div class="button" id="amount2" onclick="changeActionAmount(5, 2)">5</div>
+                        <div class="button" id="amount3" onclick="changeActionAmount(10, 3)">10</div>
+                    </div>
+                </div>
+            </div>
+            <div id="actionChanges" style="text-align:left;width:100%;margin-top:5px;">
+                <div>
+                    <input type="checkbox" id="currentListActive">
+                    <label for="currentListActive">Keep current list active</label><br>
+                    <input type="checkbox" id="repeatLastAction">
+                    <label for="repeatLastAction">Repeat last action on list</label><br>
+                    <input type="checkbox" id="addActionTop">
+                    <label for="addActionTop">Add action to top of list</label>
+                </div>
+                <div style="float:right;text-align:right;">
+                    <div class="bold" style="margin-top:3px;">Loadouts</div>
+                    <div class="button unused" id="load1" onclick="selectLoadout(1)">1</div>
+                    <div class="button unused" id="load2" onclick="selectLoadout(2)">2</div>
+                    <div class="button unused" id="load3" onclick="selectLoadout(3)">3</div>
+                    <div class="button unused" id="load4" onclick="selectLoadout(4)">4</div><br>
+                    <div class="button" style="margin-bottom:5px;margin-top:5px;" onclick="saveList()">Save List</div><br>
+                    <div class="button" onclick="loadList()">Load Selected List</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="spells" style="width:100%;text-align:center;margin-top:10px;display:none">
+            <div class="showthat">
+                <div class="large bold">Spells</div>
+                <div class="showthis">
+                </div>
+            </div><br>
+            <div style="width:100%;padding-top:5px;">
+            </div>
+        </div>
+
+    </div>
+
+    <div id="townColumn" style="width:535px;vertical-align:top;">
+        <div id="townWindow" style="width:100%;text-align:center;">
+            <div style="float:left;margin-left:150px;" class="actionIcon fa fa-arrow-left" id="townViewLeft" onclick="view.showTown(townShowing-1)"></div>
+            <div class="showthat">
+                <div class="large bold"><div class="bold" id="townName"></div></div>
+                <div class="showthis">
+                    Mana cost is based on ratio of stat %s.<br>
+                    Gained exp is proportional too.<br>
+                    Exp is gained every tick.<br>
+                    Actions will target unchecked objects before known lootable objects.<br>
+                </div>
+            </div>
+            <div style="float:right;margin-right:150px;" class="actionIcon fa fa-arrow-right" id="townViewRight" onclick="view.showTown(townShowing+1)"></div>
+        </div><br>
+        <div id="townInfo0" class='townInfo'></div>
+        <div id="townInfo1" class='townInfo' style="display:none;"></div>
+        <div id="townInfo2" class='townInfo' style="display:none;"></div>
+
+        <div class="large bold" style="display:block;margin:10px auto 2px auto;text-align:center;">Action Options</div>
+        <div id="actionOptionsTown0" class='actionOptions'></div>
+        <div id="actionOptionsTown1" class='actionOptions' style="display:none;"></div>
+        <div id="actionOptionsTown2" class='actionOptions' style="display:none;"></div>
+    </div>
+
+<!--     <div id="tutorial" style="position:absolute;width:100%;height:100%;left:0;top:0;">
+        <div style="width:100%;height:100%;background-color:grey;position:relative;opacity:.5"></div>
+        <div style="padding:20px;background-color:#e4ece5;border:1px solid black;position:absolute;text-align:left;left:150px;top:150px;">
+            TUTORIAL<br>
+            Click the Wander action and click Play to start.<br>
+            Wander for a bit, then smash pots.<br>
+            Watch the numbers change, read all the tooltips.<br>
+            Complete the town, go to the next one.<br><br>
+            <div class="button" onclick="closeTutorial()">OK</div>
+        </div>
+    </div> -->
+
+    </div>
+
 </body>
 
 
@@ -501,4 +1826,5 @@
     ga('send', 'pageview');
 
 </script>
+<script src="vue-run.js?11"></script>
 </html>
