@@ -140,14 +140,18 @@ input {
 
 .statContainer {
     width:100%;
+    position:relative;
 }
 .statLabel {
-    margin-left:5px;
-    float:left;
+    vertical-align: top;
+    position:absolute;
+    left:40px;
 }
 .statNum {
-    margin-right:5px;
     float:right;
+}
+.statLevelNum {
+    float:left;
 }
 .thinProgressBarUpper, .thinProgressBarLower {
     width:90%;
@@ -332,6 +336,7 @@ input {
 }
 
 .imageDragFix {
+    pointer-events:none;
     user-drag: none;
     user-select: none;
     -moz-user-select: none;

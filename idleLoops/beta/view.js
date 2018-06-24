@@ -4,9 +4,7 @@ function View() {
     this.totalActionList = [];
 
     this.initalize = function() {
-        for(let i = 0; i < statList.length; i++) {
-            this.updateStat(statList[i]);
-        }
+        this.createStats();
         for(let i = 0; i < skillList.length; i++) {
             this.updateSkill(skillList[i]);
         }
@@ -24,6 +22,103 @@ function View() {
         this.updateTrainingLimits();
     };
 
+    this.statBlurbs = ["Train your body.", "Know your body.", "Just a little longer. Just a little more.", "Look a little closer...", "Learning to learn.", "Conversation is a battle.", "Gotta go fast.", "Opportunity favors the fortunate.", "You are the captain."];
+    this.createStats = function() {
+        let statChartCtx = document.getElementById("statChartCtx");
+        let dataset = this.getGraphDatasets();
+        window.statChart = new Chart(statChartCtx, {
+            type: 'radar',
+            options: {
+                responsive: false,
+                maintainAspectRatio: true,
+                elements: {
+                    line: {
+                        tension: 0,
+                        borderWidth: 3
+                    }
+                },
+                scale: {
+                    ticks: {
+                        beginAtZero: true,
+                        display:false
+                    },
+                }
+            },
+            data: {
+                labels: statList,
+                datasets: dataset,
+            }
+        });
+
+        let statContainer = document.getElementById("statContainer");
+        while (statContainer.firstChild) {
+            statContainer.removeChild(statContainer.firstChild);
+        }
+
+        let totalStatDiv = "";
+        for(let i = 0; i < statList.length; i++) {
+            let stat = statList[i];
+            totalStatDiv +=
+                "<div class=\"statContainer showthat\" onmouseover=\"view.showStat('"+stat+"')\">" +
+                    "<div class=\"statLabel medium bold\">"+statsLongForm(stat)+"</div>" +
+                    "<div class='statLevelNum' id=\"stat"+stat+"Level\">0</div>" +
+                    "<div class=\"statNum medium\">" +
+                        "<div id=\"stat"+stat+"Talent\">0</div>" +
+                        "<div id=\"ss"+stat+"Container\" class=\"ssContainer\">(<div id=\"ss"+stat+"\"></div>)</div></div>" +
+                    "<div style=\"margin-top:18px;\"></div>" +
+                    "<div class=\"thinProgressBarUpper\"><div class=\"statBar statLevelBar\" id=\"stat"+stat+"LevelBar\"></div></div>" +
+                    "<div class=\"thinProgressBarLower\"><div class=\"statBar statTalentBar\" id=\"stat"+stat+"TalentBar\"></div></div>" +
+                    "<div class=\"showthis\" id=\"stat"+stat+"Tooltip\">" +
+                        this.statBlurbs[i] + "<br>" +
+                        "<div class=\"medium bold\">Level</div> <div id=\"stat"+stat+"Level2\"></div><br>" +
+                        "<div class=\"medium bold\">Level Exp</div> <div id=\"stat"+stat+"LevelExp\"></div>/<div id=\"stat"+stat+"LevelExpNeeded\"></div> <div class=\"statTooltipPerc\">(<div id=\"stat"+stat+"LevelProgress\"></div>%)</div><br>" +
+                        "<div class=\"medium bold\">Talent</div> <div id=\"stat"+stat+"Talent2\"></div><br>" +
+                        "<div class=\"medium bold\">Talent Exp</div> <div id=\"stat"+stat+"TalentExp\"></div>/<div id=\"stat"+stat+"TalentExpNeeded\"></div> <div class=\"statTooltipPerc\">(<div id=\"stat"+stat+"TalentProgress\"></div>%)</div><br>" +
+                        "<div class=\"medium bold\">Soulstone Mult</div> x<div id=\"stat"+stat+"SSBonus\"></div>" +
+                    "</div>" +
+                "</div>"
+        }
+
+        statContainer.innerHTML = totalStatDiv;
+    };
+
+    this.getGraphDatasets = function(){
+        let dataset = [
+            {
+                label : "Level",
+                data : [],
+                fill:true,
+                borderWidth:2,
+                backgroundColor:"rgba(255, 99, 132, 0.2)",
+                borderColor:"rgb(255, 99, 132)",
+                pointBackgroundColor:"rgb(255, 99, 132)",
+                pointBorderColor:"#fff",
+                pointHoverBackgroundColor:"#fff",
+                pointHoverBorderColor:"rgb(255, 99, 132)",
+                pointBorderWidth:1,
+                pointRadius:6
+            },
+            {
+                label : "Talent",
+                data : [],
+                borderWidth:2,
+                backgroundColor:"rgba(54, 162, 235, 0.2)",
+                borderColor:"rgb(54, 162, 235)",
+                pointBackgroundColor:"rgb(54, 162, 235)",
+                pointBorderColor:"#fff",
+                pointHoverBackgroundColor:"#fff",
+                pointHoverBorderColor:"rgb(54, 162, 235)",
+                pointBorderWidth:1,
+                pointRadius:6
+            }
+        ];
+        for(let i = 0; i < statList.length; i++) {
+          dataset[0].data.push(getLevel(statList[i]));
+          dataset[1].data.push(getTalent(statList[i]));
+        }
+        return dataset;
+    };
+
     this.update = function() {
         for(let i = 0; i < statList.length; i++) {
             let statName = statList[i];
@@ -37,11 +132,23 @@ function View() {
                 this.updateCurrentActionBar(i);
             }
         }
+        if (this.updateStatGraphNeeded)
+          this.updateStatGraph();
     };
 
     this.showStat = function(stat) {
         statShowing = stat;
         this.updateStat(stat);
+    };
+
+    this.updateStatGraphNeeded = false;
+    this.updateStatGraph = function () {
+        let newDatasets = this.getGraphDatasets();
+        statChart.data.datasets.forEach((dataset,x) => {
+            dataset.data = newDatasets[x].data;
+        });
+        statChart.update();
+        this.updateStatGraphNeeded = false;
     };
 
     this.updateStat = function(stat) {
@@ -118,12 +225,12 @@ function View() {
         document.getElementById("herbs").innerHTML = herbs;
     };
     this.updateHide = function() {
-        document.getElementById("hideDiv").style.display = herbs ? "inline-block" : "none";
+        document.getElementById("hideDiv").style.display = hide ? "inline-block" : "none";
         document.getElementById("hide").innerHTML = hide;
     };
     this.updatePotions = function() {
-        document.getElementById("potionsDiv").style.display = herbs ? "inline-block" : "none";
-        document.getElementById("potions").innerHTML = hide;
+        document.getElementById("potionsDiv").style.display = potions ? "inline-block" : "none";
+        document.getElementById("potions").innerHTML = potions;
     };
 
     this.updateNextActions = function () {
@@ -171,8 +278,8 @@ function View() {
             let isTravel = getTravelNum(action.name);
             totalDivText +=
                 "<div id='nextActionContainer" + i + "' class='nextActionContainer small' ondragover='handleDragOver(event)' ondrop='handleDragDrop(event)' ondragstart='handleDragStart(event)' ondragend='draggedUndecorate(" + i + ")' ondragenter='dragOverDecorate(" + i +")' ondragleave='dragExitUndecorate("+i+")' draggable='true' data-index='"+i+"'>" +
-                "<div class='bold'>" + action.loops + "</div> x " +
-                "<img src='img/" + camelize(action.name) + ".svg' class='smallIcon imageDragFix'>" +
+                "<img src='img/" + camelize(action.name) + ".svg' class='smallIcon imageDragFix'> x " +
+                "<div class='bold'>" + action.loops + "</div>" +
                 "<div style='float:right'>" +
                 capButton +
                 (isTravel ? "" : "<i id='plusButton" + i + "' onclick='addLoop(" + i + ")' class='actionIcon fa fa-plus'></i>") +
@@ -197,8 +304,8 @@ function View() {
                 "<div class='curActionContainer small' onmouseover='view.mouseoverAction("+i+", true)' onmouseleave='view.mouseoverAction("+i+", false)'>" +
                     "<div class='curActionBar' id='action"+i+"Bar'></div>" +
                     "<div class='actionSelectedIndicator' id='action"+i+"Selected'></div>" +
-                    "<div id='action"+i+"Loops' style='margin-left:3px'>"+ action.loopsLeft+"</div>(" + action.loops + ")" + " x " +
-                    "<img src='img/"+camelize(action.name)+".svg' class='smallIcon'>" +
+                    "<img src='img/"+camelize(action.name)+".svg' class='smallIcon'> x " +
+                    "<div id='action"+i+"LoopsLeft' style='margin-left:3px'>"+ action.loopsLeft+"</div>(" + "<div id='action"+i+"Loops'>" + action.loops + "</div>" + ")" +
                 "</div>";
         }
 
@@ -226,7 +333,6 @@ function View() {
         this.mouseoverAction(0, false);
     };
 
-    
     this.updateCurrentActionBarRequests = Array(50).fill(false);
     this.updateCurrentActionBarRequest = function f(index) {
         this.updateCurrentActionBarRequests[index] = true;
@@ -276,7 +382,10 @@ function View() {
     };
 
     this.updateCurrentActionLoops = function(index) {
-        document.getElementById("action"+index+"Loops").innerHTML = actions.current[index].loopsLeft;
+        document.getElementById("action" + index + "Loops").innerHTML = actions.current[index].loopsLeft;
+        if(index === (actions.current.length - 1)) {
+            document.getElementById("action" + index + "LoopsLeft").innerHTML = actions.current[index].loops;
+        }
     };
 
     this.updateProgressActions = function() {
@@ -520,11 +629,19 @@ function View() {
             let statName = keyNames[i];
             actionStats += "<div class='bold'>" + statName + "</div> " + (action.stats[statName]*100)+"%<br>";
         }
-
+        let extraImage = "";
+        if(action.affectedBy) {
+            for(let i = 0; i < action.affectedBy.length; i++) {
+                extraImage += "<img src='img/"+camelize(action.affectedBy[i])+".svg' class='smallIcon' style='position:absolute;margin-top:17px;margin-left:2px;'>";
+            }
+        }
         const totalDivText =
             "<div id='container"+action.varName+"' class='actionContainer showthat' onclick='addActionToList(\""+action.name+"\", "+action.townNum+")'>" +
                 action.name + "<br>" +
-                "<img src='img/"+camelize(action.name)+".svg' class='superLargeIcon'><br>" +
+                "<div style='position:relative'>" +
+                    "<img src='img/"+camelize(action.name)+".svg' class='superLargeIcon'>" +
+                    extraImage +
+                "</div>" +
                 "<div class='showthis'>" +
                     action.tooltip + "<br>" +
                     actionStats +
@@ -714,6 +831,58 @@ function View() {
                 trainingDiv.innerHTML = trainingLimits;
             }
         }
+    };
+
+    this.updateStory = function(num) { //when you mouseover Story
+        document.getElementById("newStory").style.display = "none";
+        if(num <= 0) {
+            num = 0;
+            document.getElementById("storyLeft").style.visibility = "hidden";
+        } else {
+            document.getElementById("storyLeft").style.visibility = "visible";
+        }
+
+        if(num >= storyMax) {
+            num = storyMax;
+            document.getElementById("storyRight").style.visibility = "hidden";
+        } else {
+            document.getElementById("storyRight").style.visibility = "visible";
+        }
+        for(let i = 0; i < 10; i++) {
+            let storyDiv = document.getElementById("story"+i);
+            if(storyDiv) {
+                storyDiv.style.display = "none";
+            }
+        }
+        storyShowing = num;
+        document.getElementById("storyPage").innerHTML = storyShowing+1;
+        document.getElementById("story"+num).style.display = "inline-block";
+    };
+}
+
+function statsLongForm(stat) {
+    if(stat === "Str") {
+        return "Strength";
+    } else if(stat === "Dex") {
+        return "Dexterity";
+    } else if(stat === "Con") {
+        return "Constitution";
+    } else if(stat === "Per") {
+        return "Perception";
+    } else if(stat === "Int") {
+        return "Intelligence";
+    } else if(stat === "Cha") {
+        return "Charisma";
+    } else if(stat === "Spd") {
+        return "Speed";
+    }
+    return stat;
+}
+
+function unlockStory(num) {
+    if(num > storyMax) {
+        document.getElementById("newStory").style.display = "inline-block";
+        storyMax = num;
     }
 }
 
@@ -725,7 +894,6 @@ for(let i = 0; i < 3; i++) {
     actionOptionsTown[i] = document.getElementById("actionOptionsTown"+i);
     townInfos[i] = document.getElementById("townInfo"+i);
 }
-
 
 function expEquals(stat) {
     return prevState.stats[stat].exp === stats[stat].exp;
