@@ -619,7 +619,7 @@
                         <div id="curActionsList" style="margin-top:10px;text-align:left;max-height:370px;overflow:auto;width:100%;">
                             <div class="curActionContainer small" v-for="(action, index) in actions.current" @mouseover="mouseoverAction(index, true)" @mouseleave="mouseoverAction(index, false)">
                                 <div :class="{curActionBar:true, actionLoopsFailed:action.loopsFailed, actionCurrentPos:actions.currentPos == index, actionFinished: action.loopsLeft === 0}" id="actionBar" :style="{width:!action.loopsLeft||action.loopsFailed?'':(100*action.ticks/action.adjustedTicks)+'%'}"></div>
-                                <div class="actionSelectedIndicator" id="actionSelected" :style="{opacity: 1 ? 1 : 0}"></div>
+                                <div class="actionSelectedIndicator"></div>
                                 <img :src="'img/' + camelize(action.name) + '.svg'" class="smallIcon">
                                 x <div id="actionLoopsLeft" style="margin-left:3px">{{ action.loops }}</div>
                                 (<div id="actionLoops">{{ action.loopsLeft }}</div>)

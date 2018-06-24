@@ -19,14 +19,6 @@ div#skillList {
     margin-top: 15px;
 }
 
-.actionSelectedIndicator {
-    opacity: 0;
-}
-
-.curActionBar.actionCurrentPos+ .actionSelectedIndicator {
-    opacity: 1;
-}
-
 .curActionBar.actionFinished {
     width: 100%;
     background-color: #6d6d6d;
@@ -37,4 +29,24 @@ div#skillList {
     background-color: #ff0000;
     height: 30%;
     margin-top: 5px;
+}
+
+.actionSelectedIndicator {
+    /* opacity: 0; */
+    width:  0px;
+    animation: width 1s;
+}
+
+.curActionContainer:hover > .actionSelectedIndicator {
+    opacity : 1;
+    width: 83px;
+}
+
+.smallIcon {
+    vertical-align: bottom;
+    margin: 2px 2px 1px 3px;
+}
+
+.curActionContainer:hover > .smallIcon {
+    margin-left: 6px;
 }
