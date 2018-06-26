@@ -850,21 +850,37 @@ function addStatColors(theDiv, stat) {
 }
 
 function dragOverDecorate(i) {
-    if(document.getElementById("nextActionContainer" + i))
-    document.getElementById("nextActionContainer" + i).classList.add("draggedOverAction");
+    if (i==+i) {
+        if(document.getElementById("nextActionContainer" + i))
+        document.getElementById("nextActionContainer" + i).classList.add("draggedOverAction");
+    } else {
+        i.target.classList.add("draggedOverAction");
+    }
 }
 
 function dragExitUndecorate(i) {
-    if(document.getElementById("nextActionContainer" + i))
-    document.getElementById("nextActionContainer" + i).classList.remove("draggedOverAction");
+    if (i==+i) {
+        if(document.getElementById("nextActionContainer" + i))
+        document.getElementById("nextActionContainer" + i).classList.remove("draggedOverAction");
+    } else {
+        i.target.classList.remove("draggedOverAction");
+    }
 }
 
 function draggedDecorate(i) {
-    if(document.getElementById("nextActionContainer" + i))
-    document.getElementById("nextActionContainer" + i).classList.add("draggedAction");
+    if (i==+i) {
+        if(document.getElementById("nextActionContainer" + i))
+        document.getElementById("nextActionContainer" + i).classList.add("draggedAction");
+    } else {
+        i.target.classList.add("draggedAction");
+    }
 }
 
 function draggedUndecorate(i) {
-    if(document.getElementById("nextActionContainer" + i))
-    document.getElementById("nextActionContainer" + i).classList.remove("draggedAction");
+    if (i==+i) {
+        if(document.getElementById("nextActionContainer" + i))
+        document.getElementById("nextActionContainer" + i).classList.remove("draggedAction");
+    } else {
+        i.target.classList.remove("draggedAction");
+    }
 }

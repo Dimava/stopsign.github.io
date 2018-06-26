@@ -33,18 +33,13 @@ div#skillList {
 
 .actionSelectedIndicator {
     opacity: 1;
-    width:  0px;
-    transition: border-left-width 0.2s, width 0.3s;
-    background-color: rgba(9, 0, 226, 0.1);
-    border-left: 0px solid #0900e2;
-}
-
-.curActionBar.actionFinished>.actionSelectedIndicator {
-    background-color: rgba(9, 0, 226, 0.1);
+    width: 0px;
+    transition: width 0.2s, border-left-width 0.2s;
+    background-color: rgba(9, 0, 226, 0.15);
+    border-left:  0px solid #0900e2;
 }
 
 .curActionContainer:hover > .actionSelectedIndicator {
-    opacity : 1;
     width: calc(100% - 3px);
     border-left-width: 3px;
 }
@@ -52,7 +47,7 @@ div#skillList {
 .smallIcon {
     vertical-align: bottom;
     margin: 2px 2px 1px 3px;
-    transition:  margin-left 0.2s;
+    transition: margin-left 0.2s;
 }
 
 .curActionContainer:hover > .smallIcon {
