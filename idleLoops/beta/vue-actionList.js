@@ -1,4 +1,95 @@
-'use strict';
+// town action,as it appears in the Action Options grid
+class Action {
+    constructor(n) {
+        this.n = n;
+    }
+    get manaCost() {
+        return 10000;
+    }
+    get name() {
+        return "Action Name";
+    }
+    get expMult() {
+        return 1;
+    }
+    get tooltip() {
+        return "A sample action";
+    }
+    get townNum() {
+        return 0;
+    }
+    get infoName() {
+        return "Actions Done";
+    }
+    get varName() {
+        return "Act";
+    }
+    get visible(){
+        return true;
+    }
+    get unlocked(){
+        return true;
+    }
+    finish(){
+        console.log('Action finished', this);
+    }
+}
+Action.prototype.stats = {
+    Dex: .1,
+    Str: .1,
+    Con: .1,
+    Spd: .1,
+    Per: .1,
+    Cha: .1,
+    Int: .1,
+    Luck: .1,
+    Soul: .1,
+};
+Action.prototype.affectedBy = {
+    Glasses: 1,
+};
+
+// action, as it appears in the nextActionsList
+class ActionPlanned {
+    constructor(action){
+        this.action = action;
+    }
+}
+
+// action, as it appears in the curActionList
+class ActionState {
+    constructor(planned){
+        this.action = planned.action;
+        this.planned = planned;
+    }
+}
+
+// variables with progress, like exploration
+class ProgressVar{
+    constructor(exp){
+        this.exp = exp;
+    }
+    get level(){
+
+    }
+}
+
+// checkable items, like pots or herbs. May be joined to ProgressVar
+class CheckableVar{
+    constructor(progress){
+        this.progress = progress;
+    }
+}
+
+// checkable items, as they appear in Action Options. May be joined to CheckableVar
+class CheckableVarState{
+    constructor(check){
+        this.check = check;
+        this.progress = check.progress;
+    }
+}
+
+/*
 function translateClassNames(name) {
     if(name === "Wander") {
         return new Wander();
@@ -1397,3 +1488,5 @@ function SmallDungeon() {
     this.finish = function() {
     };
 }
+
+*/

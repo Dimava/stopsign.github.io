@@ -86,6 +86,9 @@ Long Quests get 1% more gold per level from 201-400 (rounded down).`,
     computed: {
         manaTimer() {
             return intToString(this.mana, 1) + " | " + intToString(this.mana / 50, 2) + "s";
+        },
+        n(){
+            return this.a.s;
         }
     }
 })
