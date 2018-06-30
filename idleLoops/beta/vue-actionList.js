@@ -1,7 +1,9 @@
+completeActionList = {};
+completeProgressVarList = {};
 // town action,as it appears in the Action Options grid
 class Action {
-    constructor(n) {
-        this.n = n;
+    constructor() {
+        this.progress = null;
     }
     get manaCost() {
         return 10000;
@@ -21,17 +23,34 @@ class Action {
     get infoName() {
         return "Actions Done";
     }
-    get varName() {
-        return "Act";
-    }
-    get visible(){
+    //     get varName() { // do I need this? Or is it `progress`?
+    //         return "Act";
+    //     }
+    get visible() {
         return true;
     }
-    get unlocked(){
+    get unlocked() {
         return true;
     }
-    finish(){
-        console.log('Action finished', this);
+    finish() {
+        console.log(this.name + ' finished', this);
+        if (this.progress) {
+            let xp = 200;
+            for (item in this.affectedBy)
+                if (window[item])
+                    xp *= this.affectedBy[item];
+            //TODO!!! window[item] is bad
+            this.progress.add();
+        }
+    }
+    // specific:
+    get cap() {
+        return 0;
+        // none, falsy
+    }
+    get travel() {
+        return false;
+        // none, truthy walue maybe Town? idk
     }
 }
 Action.prototype.stats = {
@@ -51,44 +70,351 @@ Action.prototype.affectedBy = {
 
 // action, as it appears in the nextActionsList
 class ActionPlanned {
-    constructor(action){
+    constructor(action) {
         this.action = action;
     }
 }
 
 // action, as it appears in the curActionList
 class ActionState {
-    constructor(planned){
+    constructor(planned) {
         this.action = planned.action;
         this.planned = planned;
     }
 }
 
 // variables with progress, like exploration
-class ProgressVar{
-    constructor(exp){
-        this.exp = exp;
+class ProgressVar {
+    constructor(name) {
+        this.name = name;
+        this.exp = 0;
+        this.checks = [];
     }
-    get level(){
-
+    get level() {
+        return Math.floor((Math.sqrt(8 * this.exp / 100 + 1) - 1) / 2);
+    }
+    get expFromLevel() {
+        
+    }
+    get prcToNext() {
+        return 100 * ( this.exp - ProgressVar.levelExp(this.level) ) / (ProgressVar.levelExp(this.level+1)-ProgressVar.levelExp(this.level));
+    }
+    static levelExp(level){
+        return level * (level + 1) * 50;
+    }
+    levelUp(){
+        console.log(this.name+' leveled up',this);
+    }
+    addCheckable(name){
+        this.checks.push(new CheckableVar(name,this))
     }
 }
 
 // checkable items, like pots or herbs. May be joined to ProgressVar
-class CheckableVar{
-    constructor(progress){
+class CheckableVar {
+    constructor(name, progress) {
+        this.name = name;
         this.progress = progress;
     }
 }
 
 // checkable items, as they appear in Action Options. May be joined to CheckableVar
-class CheckableVarState{
-    constructor(check){
+class CheckableVarState {
+    constructor(check) {
         this.check = check;
         this.progress = check.progress;
     }
 }
 
+//Progress actions
+//Progress actions have a progress bar and use 100,200,300,etc. leveling system
+
+class Wander extends Action {
+    constructor() {
+        this.progress = new ProgressVar("Wander");
+    }
+    get manaCost() {
+        return 250;
+    }
+    get name() {
+        return "Wander";
+    }
+    get expMult() {
+        return 1;
+    }
+    get tooltip() {
+        return "Explore the town, look for hidden areas and treasures.";
+    }
+    get townNum() {
+        return 0;
+    }
+    get infoName() {
+        return "Explored";
+    }
+    get varName() {
+        return "Act";
+    }
+    get visible() {
+        return true;
+    }
+    get unlocked() {
+        return true;
+    }
+}
+Wander.prototype.affectedBy = {
+    Glasses: 4,
+};
+Wander.prototype.stats = {
+    Per: .2,
+    Con: .2,
+    Cha: .2,
+    Spd: .3,
+    Luck: .1
+};
+// function adjustPots() {
+//     towns[0].totalPots = towns[0].getLevel("Wander") * 5;
+// }
+// function adjustLocks() {
+//     towns[0].totalLocks = towns[0].getLevel("Wander");
+// }
+
+// function MeetPeople() {
+//     this.name = "Meet People";
+//     this.expMult = 1;
+//     this.tooltip = "They won't let you get away with a simple chat.<br>Unlocked at 22% Explored";
+//     this.townNum = 0;
+
+//     this.infoName = "People Met";
+//     this.varName = "Met";
+//     this.stats = {
+//         Int:.1,
+//         Cha:.8,
+//         Soul:.1
+//     };
+//     this.manaCost = function() {
+//         return 800;
+//     };
+//     this.visible = function() {
+//         return towns[0].getLevel("Wander") >= 10;
+//     };
+//     this.unlocked = function() {
+//         return towns[0].getLevel("Wander") >= 22;
+//     };
+//     this.finish = function() {
+//         towns[0].finishProgress(this.varName, 200, function() {
+//             adjustSQuests();
+//         });
+//     };
+// }
+// function adjustSQuests() {
+//     towns[0].totalSQuests = towns[0].getLevel("Met");
+// }
+
+// function Investigate() {
+//     this.name = "Investigate";
+//     this.expMult = 1;
+//     this.tooltip = "You've been hearing some rumors...<br>Unlocked at 25% People Met";
+//     this.townNum = 0;
+
+//     this.infoName = "Investigated";
+//     this.varName = "Secrets";
+//     this.stats = {
+//         Per:.3,
+//         Cha:.4,
+//         Spd:.2,
+//         Luck:.1
+//     };
+//     this.manaCost = function() {
+//         return 1000;
+//     };
+//     this.visible = function() {
+//         return towns[0].getLevel("Met") >= 5;
+//     };
+//     this.unlocked = function() {
+//         return towns[0].getLevel("Met") >= 25;
+//     };
+//     this.finish = function() {
+//         towns[0].finishProgress(this.varName, 500, function() {
+//             adjustLQuests();
+//         });
+//     };
+// }
+// function adjustLQuests() {
+//     towns[0].totalLQuests = Math.floor(towns[0].getLevel("Secrets")/2);
+// }
+
+// function ExploreForest() {
+//     this.name = "Explore Forest";
+//     this.expMult = 1;
+//     this.tooltip = "What a pleasant area.<br>2x progress with glasses";
+//     this.townNum = 1;
+
+//     this.infoName = "Forest Explored";
+//     this.varName = "Forest";
+//     this.stats = {
+//         Per:.4,
+//         Con:.2,
+//         Spd:.2,
+//         Luck:.2
+//     };
+//     this.affectedBy = ["Buy Glasses"];
+//     this.manaCost = function() {
+//         return 400;
+//     };
+//     this.visible = function() {
+//         return true;
+//     };
+//     this.unlocked = function() {
+//         return true;
+//     };
+//     this.finish = function() {
+//         towns[1].finishProgress(this.varName, 100 * (glasses ? 2 : 1), function() {
+//             adjustWildMana();
+//             adjustHunt();
+//             adjustHerbs();
+//         });
+//     };
+// }
+// function adjustWildMana() {
+//     towns[1].totalWildMana = towns[1].getLevel("Forest") * 5;
+// }
+// function adjustHunt() {
+//     towns[1].totalHunt = towns[1].getLevel("Forest") * 2;
+// }
+// function adjustHerbs() {
+//     towns[1].totalHerbs = towns[1].getLevel("Forest") * 5 + towns[1].getLevel("Shortcut") * 2;
+// }
+
+// function OldShortcut() {
+//     this.name = "Old Shortcut";
+//     this.expMult = 1;
+//     this.tooltip = "No one has come down this way in quite some time.<br>Gives some additional herbs.<br>Gives something to talk about with the Hermit. Get 1% reward for Talk to Hermit result per 1% Shortcut Explored.<br>Unlocked at 20% Forest Explored.";
+//     this.townNum = 1;
+
+//     this.infoName = "Shortcut Explored";
+//     this.varName = "Shortcut";
+//     this.stats = {
+//         Per:.3,
+//         Con:.4,
+//         Spd:.2,
+//         Luck:.1
+//     };
+//     this.manaCost = function() {
+//         return 1200;
+//     };
+//     this.visible = function() {
+//         return true;
+//     };
+//     this.unlocked = function() {
+//         return towns[1].getLevel("Forest") >= 20;
+//     };
+//     this.finish = function() {
+//         towns[1].finishProgress(this.varName, 100, function() {
+//             adjustHerbs();
+//         });
+//     };
+// }
+
+// function TalkToHermit() {
+//     this.name = "Talk To Hermit";
+//     this.expMult = 1;
+//     this.tooltip = "This old man is happy to have a listening ear, surely he has some useful knowledge. You hope.<br>Speed is 1% faster for Gather Herbs, Practical Magic, and Learn Alchemy per 1% of Hermit Knowledge.<br>Unlocked with both 20% Shortcut Explored and 40 Magic";
+//     this.townNum = 1;
+
+//     this.infoName = "Hermit Knowledge Learned";
+//     this.varName = "Hermit";
+//     this.stats = {
+//         Con:.5,
+//         Cha:.3,
+//         Soul:.2
+//     };
+//     this.manaCost = function() {
+//         return 2000;
+//     };
+//     this.visible = function() {
+//         return true;
+//     };
+//     this.unlocked = function() {
+//         return towns[1].getLevel("Shortcut") >= 20 && getSkillLevel("Magic") >= 40;
+//     };
+//     this.finish = function() {
+//         towns[1].finishProgress(this.varName, 50 * (1 + towns[1].getLevel("Shortcut")/100), function() {
+//             view.adjustManaCost("Gather Herbs");
+//             view.adjustManaCost("Practical Magic");
+//         });
+//     };
+// }
+
+// function ExploreCity() {
+//     this.name = "Explore City";
+//     this.expMult = 1;
+//     this.tooltip = "Everyone is so busy, and there's so much to do.<br>2x progress with glasses";
+//     this.townNum = 2;
+
+//     this.infoName = "City Explored";
+//     this.varName = "City";
+//     this.stats = {
+//         Con:.1,
+//         Per:.3,
+//         Cha:.2,
+//         Spd:.3,
+//         Luck:.1
+//     };
+//     this.affectedBy = ["Buy Glasses"];
+//     this.manaCost = function() {
+//         return 750;
+//     };
+//     this.visible = function() {
+//         return true;
+//     };
+//     this.unlocked = function() {
+//         return true;
+//     };
+//     this.finish = function() {
+//         towns[2].finishProgress(this.varName, 100 * (glasses ? 2 : 1), function() {
+//             adjustSuckers();
+//         });
+//     };
+// }
+// function adjustSuckers() {
+//     towns[2].totalGamble = towns[2].getLevel("City") * 10;
+// }
+
+// function GetDrunk() {
+//     this.name = "Get Drunk";
+//     this.expMult = 1;
+//     this.tooltip = "Sometimes you just need a drink.<br>Costs 2 gold and requires reputation greater than -3.<br>Costs 1 reputation.<br>Unlocked at 20% City Explored.";
+//     this.townNum = 2;
+
+//     this.infoName = "Rumors Heard";
+//     this.varName = "Drunk";
+//     this.stats = {
+//         Str:.1,
+//         Cha:.5,
+//         Con:.2,
+//         Soul:.2
+//     };
+//     this.canStart = function() {
+//         return reputation >= -3 && gold >= 2
+//     };
+//     this.cost = function() {
+//         addReputation(-1);
+//         addGold(-2);
+//     };
+//     this.manaCost = function() {
+//         return 1000;
+//     };
+//     this.visible = function() {
+//         return true;
+//     };
+//     this.unlocked = function() {
+//         return towns[2].getLevel("City") >= 20;
+//     };
+//     this.finish = function() {
+//         towns[2].finishProgress(this.varName, 100, function() {
+//         });
+//     };
+// }
 /*
 function translateClassNames(name) {
     if(name === "Wander") {
@@ -185,285 +511,7 @@ function getTravelNum(name) {
 let townNames = ["Beginnersville", "Forest Path", "Merchanton"];
 
 
-//Progress actions
-//Progress actions have a progress bar and use 100,200,300,etc. leveling system
 
-function Wander() {
-    this.name = "Wander";
-    this.expMult = 1;
-    this.tooltip = "Explore the town, look for hidden areas and treasures.";
-    this.townNum = 0;
-
-    this.infoName = "Explored";
-    this.varName = "Wander";
-    this.stats = {
-        Per:.2,
-        Con:.2,
-        Cha:.2,
-        Spd:.3,
-        Luck:.1
-    };
-    this.affectedBy = ["Buy Glasses"];
-    this.manaCost = function() {
-        return 250;
-    };
-    this.visible = function() {
-        return true;
-    };
-    this.unlocked = function() {
-        return true;
-    };
-    this.finish = function() {
-        towns[0].finishProgress(this.varName, 200 * (glasses ? 4 : 1), function() {
-            adjustPots();
-            adjustLocks();
-        });
-    };
-}
-function adjustPots() {
-    towns[0].totalPots = towns[0].getLevel("Wander") * 5;
-}
-function adjustLocks() {
-    towns[0].totalLocks = towns[0].getLevel("Wander");
-}
-
-function MeetPeople() {
-    this.name = "Meet People";
-    this.expMult = 1;
-    this.tooltip = "They won't let you get away with a simple chat.<br>Unlocked at 22% Explored";
-    this.townNum = 0;
-
-    this.infoName = "People Met";
-    this.varName = "Met";
-    this.stats = {
-        Int:.1,
-        Cha:.8,
-        Soul:.1
-    };
-    this.manaCost = function() {
-        return 800;
-    };
-    this.visible = function() {
-        return towns[0].getLevel("Wander") >= 10;
-    };
-    this.unlocked = function() {
-        return towns[0].getLevel("Wander") >= 22;
-    };
-    this.finish = function() {
-        towns[0].finishProgress(this.varName, 200, function() {
-            adjustSQuests();
-        });
-    };
-}
-function adjustSQuests() {
-    towns[0].totalSQuests = towns[0].getLevel("Met");
-}
-
-function Investigate() {
-    this.name = "Investigate";
-    this.expMult = 1;
-    this.tooltip = "You've been hearing some rumors...<br>Unlocked at 25% People Met";
-    this.townNum = 0;
-
-    this.infoName = "Investigated";
-    this.varName = "Secrets";
-    this.stats = {
-        Per:.3,
-        Cha:.4,
-        Spd:.2,
-        Luck:.1
-    };
-    this.manaCost = function() {
-        return 1000;
-    };
-    this.visible = function() {
-        return towns[0].getLevel("Met") >= 5;
-    };
-    this.unlocked = function() {
-        return towns[0].getLevel("Met") >= 25;
-    };
-    this.finish = function() {
-        towns[0].finishProgress(this.varName, 500, function() {
-            adjustLQuests();
-        });
-    };
-}
-function adjustLQuests() {
-    towns[0].totalLQuests = Math.floor(towns[0].getLevel("Secrets")/2);
-}
-
-function ExploreForest() {
-    this.name = "Explore Forest";
-    this.expMult = 1;
-    this.tooltip = "What a pleasant area.<br>2x progress with glasses";
-    this.townNum = 1;
-
-    this.infoName = "Forest Explored";
-    this.varName = "Forest";
-    this.stats = {
-        Per:.4,
-        Con:.2,
-        Spd:.2,
-        Luck:.2
-    };
-    this.affectedBy = ["Buy Glasses"];
-    this.manaCost = function() {
-        return 400;
-    };
-    this.visible = function() {
-        return true;
-    };
-    this.unlocked = function() {
-        return true;
-    };
-    this.finish = function() {
-        towns[1].finishProgress(this.varName, 100 * (glasses ? 2 : 1), function() {
-            adjustWildMana();
-            adjustHunt();
-            adjustHerbs();
-        });
-    };
-}
-function adjustWildMana() {
-    towns[1].totalWildMana = towns[1].getLevel("Forest") * 5;
-}
-function adjustHunt() {
-    towns[1].totalHunt = towns[1].getLevel("Forest") * 2;
-}
-function adjustHerbs() {
-    towns[1].totalHerbs = towns[1].getLevel("Forest") * 5 + towns[1].getLevel("Shortcut") * 2;
-}
-
-function OldShortcut() {
-    this.name = "Old Shortcut";
-    this.expMult = 1;
-    this.tooltip = "No one has come down this way in quite some time.<br>Gives some additional herbs.<br>Gives something to talk about with the Hermit. Get 1% reward for Talk to Hermit result per 1% Shortcut Explored.<br>Unlocked at 20% Forest Explored.";
-    this.townNum = 1;
-
-    this.infoName = "Shortcut Explored";
-    this.varName = "Shortcut";
-    this.stats = {
-        Per:.3,
-        Con:.4,
-        Spd:.2,
-        Luck:.1
-    };
-    this.manaCost = function() {
-        return 1200;
-    };
-    this.visible = function() {
-        return true;
-    };
-    this.unlocked = function() {
-        return towns[1].getLevel("Forest") >= 20;
-    };
-    this.finish = function() {
-        towns[1].finishProgress(this.varName, 100, function() {
-            adjustHerbs();
-        });
-    };
-}
-
-function TalkToHermit() {
-    this.name = "Talk To Hermit";
-    this.expMult = 1;
-    this.tooltip = "This old man is happy to have a listening ear, surely he has some useful knowledge. You hope.<br>Speed is 1% faster for Gather Herbs, Practical Magic, and Learn Alchemy per 1% of Hermit Knowledge.<br>Unlocked with both 20% Shortcut Explored and 40 Magic";
-    this.townNum = 1;
-
-    this.infoName = "Hermit Knowledge Learned";
-    this.varName = "Hermit";
-    this.stats = {
-        Con:.5,
-        Cha:.3,
-        Soul:.2
-    };
-    this.manaCost = function() {
-        return 2000;
-    };
-    this.visible = function() {
-        return true;
-    };
-    this.unlocked = function() {
-        return towns[1].getLevel("Shortcut") >= 20 && getSkillLevel("Magic") >= 40;
-    };
-    this.finish = function() {
-        towns[1].finishProgress(this.varName, 50 * (1 + towns[1].getLevel("Shortcut")/100), function() {
-            view.adjustManaCost("Gather Herbs");
-            view.adjustManaCost("Practical Magic");
-        });
-    };
-}
-
-function ExploreCity() {
-    this.name = "Explore City";
-    this.expMult = 1;
-    this.tooltip = "Everyone is so busy, and there's so much to do.<br>2x progress with glasses";
-    this.townNum = 2;
-
-    this.infoName = "City Explored";
-    this.varName = "City";
-    this.stats = {
-        Con:.1,
-        Per:.3,
-        Cha:.2,
-        Spd:.3,
-        Luck:.1
-    };
-    this.affectedBy = ["Buy Glasses"];
-    this.manaCost = function() {
-        return 750;
-    };
-    this.visible = function() {
-        return true;
-    };
-    this.unlocked = function() {
-        return true;
-    };
-    this.finish = function() {
-        towns[2].finishProgress(this.varName, 100 * (glasses ? 2 : 1), function() {
-            adjustSuckers();
-        });
-    };
-}
-function adjustSuckers() {
-    towns[2].totalGamble = towns[2].getLevel("City") * 10;
-}
-
-function GetDrunk() {
-    this.name = "Get Drunk";
-    this.expMult = 1;
-    this.tooltip = "Sometimes you just need a drink.<br>Costs 2 gold and requires reputation greater than -3.<br>Costs 1 reputation.<br>Unlocked at 20% City Explored.";
-    this.townNum = 2;
-
-    this.infoName = "Rumors Heard";
-    this.varName = "Drunk";
-    this.stats = {
-        Str:.1,
-        Cha:.5,
-        Con:.2,
-        Soul:.2
-    };
-    this.canStart = function() {
-        return reputation >= -3 && gold >= 2
-    };
-    this.cost = function() {
-        addReputation(-1);
-        addGold(-2);
-    };
-    this.manaCost = function() {
-        return 1000;
-    };
-    this.visible = function() {
-        return true;
-    };
-    this.unlocked = function() {
-        return towns[2].getLevel("City") >= 20;
-    };
-    this.finish = function() {
-        towns[2].finishProgress(this.varName, 100, function() {
-        });
-    };
-}
 
 //Basic actions
 //Basic actions have no additional UI
