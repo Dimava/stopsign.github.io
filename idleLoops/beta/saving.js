@@ -62,6 +62,7 @@ let dungeons;
 
 window.curAdvGuildSegment = 0;
 window.curCraftGuildSegment = 0;
+window.curTournamentSegment = 0;
 
 
 function closeTutorial() {
@@ -129,6 +130,7 @@ function load() {
     town.expApprentice = toLoad.expApprentice !== undefined ? toLoad.expApprentice : 0;
     town.expMason = toLoad.expMason !== undefined ? toLoad.expMason : 0;
     town.expArchitect = toLoad.expArchitect !== undefined ? toLoad.expArchitect : 0;
+    town.totalTournament = toLoad.totalTournament !== undefined ? toLoad.totalTournament : 0;
 
     actions.next = [];
     if(toLoad.nextList) {
@@ -262,6 +264,7 @@ function save() {
     toSave.expApprentice = town.expApprentice;
     toSave.expMason = town.expMason;
     toSave.expArchitect = town.expArchitect;
+    toSave.totalTournament = town.totalTournament;
 
     for(let i = 0; i < towns.length; i++) {
         town = towns[i];

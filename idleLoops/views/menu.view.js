@@ -26,10 +26,15 @@ Views.registerView('menu',{
      return html;
    },
    htmlSaveMenu : function () {
-     var html = "<div style='display:inline-block;height:30px;margin-left:10px;' class='showthatH'>";
-     html += _txt("menu>save>meta>title");
-     html += "<div class='showthisH'>";
-      html += "<div class='button' onclick='save()'>"+_txt("menu>save>manual_save")+"</div><br>";
+     var html = "<div style='display:inline-block;height:30px;margin-left:10px;cursor:pointer;'>";
+     html += "<div onclick='showSavingDiv()'>" + _txt("menu>save>meta>title") + "</div>";
+     html += "<div id='savingDiv' class='showthis' style='cursor:default'>";
+        html += "<div style='float:right;cursor:pointer' class='fa fa-times' onclick='hideSavingDiv()'></div>";
+       html += "<div class='button' onclick='save()'>"+_txt("menu>save>manual_save")+"</div><br>";
+       html += "<textarea id='exportImportList'></textarea><label for='exportImportList'> "+_txt("menu>save>list_label")+"</label><br>";
+       html += "<div class='button' onclick='exportCurrentList()'>"+_txt("menu>save>export_button")+"</div>";
+       html += "<div class='button' onclick='importCurrentList()'>"+_txt("menu>save>import_button")+"</div><br>";
+       html += _txt("menu>save>list_comment")+ "<br><br>";
       html += "<input id='exportImport'><label for='exportImport'> "+_txt("menu>save>input_label")+"</label><br>";
       html += "<div class='button' onclick='exportSave()'>"+_txt("menu>save>export_button")+"</div><br>";
       html += _txt("menu>save>export_comment")+"<br>";
@@ -58,7 +63,7 @@ Views.registerView('menu',{
      var html = "<div style='display:inline-block;height:30px;margin-left:10px;' class='showthatH'>";
      html += _txt("menu>options>meta>title");
      html += "<div class='showthisH'>";
-      html += "<a href='_blank' href='"+_txt("menu>options>discord>link")+"'>"+_txt("menu>options>discord>title")+"</a><br>";
+      html += "<a target='_blank' href='"+_txt("menu>options>discord>link")+"'>"+_txt("menu>options>discord>title")+"</a><br>";
       if (Object.keys(Localization.supportedLang).length>1)
         html += Views.menu.htmlLocalizationMenu();
       html += _txt("menu>options>adblock_warning")+"<br>";
