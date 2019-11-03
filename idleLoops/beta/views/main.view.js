@@ -998,7 +998,6 @@ function draggedDecorate(i) {
 }
 
 function draggedUndecorate(i) {
-<<<<<<< HEAD:idleLoops/beta/view.js
     if (i==+i) {
         if(document.getElementById("nextActionContainer" + i))
         document.getElementById("nextActionContainer" + i).classList.remove("draggedAction");
@@ -1006,8 +1005,3 @@ function draggedUndecorate(i) {
         i.target.classList.remove("draggedAction");
     }
 }
-=======
-    if(document.getElementById("nextActionContainer" + i))
-    document.getElementById("nextActionContainer" + i).classList.remove("draggedAction");
-}
->>>>>>> upstream/master:idleLoops/beta/views/main.view.js
